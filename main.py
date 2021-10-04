@@ -126,7 +126,6 @@ def run_a(solver_name):
 
 def run_b(solver_name):
     costs_b = load_files_matrix(list_files(BASE_PATH_B), 'f')
-    #
     solution_time_b = [(key, solve(key, costs_b[key], solver_name)) for key in costs_b]
     write_output(f'{solver_name}-B', solution_time_b)
 
@@ -146,5 +145,5 @@ def run_solvers(solvers):
 
 if __name__ == '__main__':
     solvers = ['PULP_CBC_CMD', 'GUROBI', 'HUNGARIAN']
-    # run_solvers(solvers)
+    run_solvers(solvers)
     generate_final_results(solvers)
