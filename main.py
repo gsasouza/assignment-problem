@@ -1,12 +1,21 @@
-from sys import maxsize
+# to manipulate files and data structures
 from os import listdir
 from os.path import isfile, join
-from munkres import Munkres
-from multiprocessing import Process
 import numpy as np
-import pulp as pl
+from sys import maxsize
+
+# solvers
+import pulp as pl  # (https://github.com/coin-or/pulp) solves CBC and GUROBI algorithm
+from munkres import Munkres  # (https://software.clapper.org/munkres/) solves hungarian algorithm
+
+# to run solvers in parallel
+from multiprocessing import Process
+
+# to measure elapsed time in each instance
 import time
 
+
+# constants
 BASE_PATH_A = './instancias/insta'
 BASE_PATH_B = './instancias/instb'
 BASE_PATH_RESULTS = './results'
