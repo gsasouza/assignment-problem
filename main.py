@@ -10,6 +10,10 @@ BASE_PATH = './instancias'
 BASE_PATH_RESULTS = './results'
 SOLVER = 'GUROBI'
 THREE_MINUTES_IN_SECONDS = 3 * 60
+PRESOLVE = -1  # Liga/Desliga o pré-processamento, default = -1: https://www.gurobi.com/documentation/9.5/refman/presolve.html
+VAR_BRANCH = 3  # Determina a estratégia de escolha da variável ser ramificada, default = -1: https://www.gurobi.com/documentation/9.5/refman/varbranch.html
+BRANCH_DIR = 0  # Determina qual nó vai escolhido pra ser explorado, default = 0: https://www.gurobi.com/documentation/9.5/refman/branchdir.html
+CUTS = -1  # Determina a estrategia pra executar cortes, default = -1: https://www.gurobi.com/documentation/9.5/refman/cuts.html
 
 
 def list_files(path):
@@ -18,21 +22,8 @@ def list_files(path):
     return files
 
 
-def generate_final_result_by_type(solvers_name, type, path):
-    files = [name.split('/').pop() for name in list_files(path)]
-    results_by_solver = [np.genfromtxt(f'{BASE_PATH_RESULTS}/{solver}-{type}.csv').tolist() for solver in solvers_name]
-
-    header = ['file_name', ''] + [solver for (solver) in solvers_name]
-    data_rows = [[f"{value:.4f}" for value in row] for row in list(zip(*results_by_solver))]
-
-    with open(f'{BASE_PATH_RESULTS}/{file}.csv', 'w') as output:
-        output.write(','.join(header) + '\n')
-        for i in range(len(files)):
-            output.write(','.join([files[i], *data_rows[i]]) + '\n')
-
-
 def write_solutions(solutions):
-    header = ['Nome do Arquivo', 'Status', 'Nos Explorados', 'Limitante Dual', 'Melhor Resultado', 'Gap']
+    header = ['Nome do Arquivo', 'Status', 'Nos Explorados', 'Limitante Dual', 'Melhor Resultado', 'Gap (%)']
     with open(f'{BASE_PATH_RESULTS}/T2.csv', 'w') as output:
         output.write(','.join(header) + '\n')
         for i in range(len(solutions)):
@@ -41,7 +32,8 @@ def write_solutions(solutions):
 
 def solve(file_name, agents, tasks, profit_matrix, cost_matrix, capacity):
     prob = pl.LpProblem(file_name, pl.LpMaximize)
-    solver = pl.getSolver(SOLVER, timeLimit=THREE_MINUTES_IN_SECONDS)
+    solver = pl.getSolver(SOLVER, timeLimit=THREE_MINUTES_IN_SECONDS, Presolve=PRESOLVE, VarBranch=VAR_BRANCH,
+                          Cuts=CUTS, BranchDir=BRANCH_DIR)
 
     # I = Agent, J = Task
     # define as variaveis
@@ -99,8 +91,7 @@ def load_files(files):
 def run():
     files = list_files(BASE_PATH)
     problem_inputs = load_files(files)
-    # solve('./instancias/d60900.in', *problem_inputs['./instancias/d60900.in'])
-    solutions = [[key, *solve(key, *problem_inputs[key])] for key in files]
+    solutions = [[*solve(key, *problem_inputs[key])] for key in files]
     write_solutions(solutions)
 
 
